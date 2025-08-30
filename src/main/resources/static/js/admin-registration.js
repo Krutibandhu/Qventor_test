@@ -1,68 +1,114 @@
+import com.code4cause.qventor.model.Admin;
+import com.code4cause.qventor.model.ExportRecord;
+import com.code4cause.qventor.model.ImportRecord;
+import com.code4cause.qventor.model.Warehouse;
+import com.code4cause.qventor.service.AdminService;
+import com.code4cause.qventor.service.WarehouseService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
-import { supabase } from "./supabase-client.js";
+import java.util.List;
 
-// get the form element
-const registrationForm = document.querySelector("#admin-registration-form");
+@CrossOrigin(origins = "*")
+@RestController
+@RequestMapping("/api/admins")
+public class AdminController {
 
-// when the form is submitted
-registrationForm.addEventListener("submit", async (e) => {
-  e.preventDefault(); // stop page reload
+    private final AdminService adminService;
+    public final WarehouseService warehouseService;
 
-  // collect values from input fields
-  const fullName = document.querySelector("#admin-fullname").value;
-  const email = document.querySelector("#admin-email").value;
-  const phoneNumber = document.querySelector("#admin-phone").value;
-  const password = document.querySelector("#admin-password").value;
-  const confirmPassword = document.querySelector(
-    "#admin-confirmpassword"
-  ).value;
-  const companyName = document.querySelector("#admin-companyname").value;
-  const location = document.querySelector("#admin-whadress").value;
-  const warehouseName =
-    document.querySelector("#admin-whname").value || "Default Warehouse";
+    @Autowired
+    public AdminController(AdminService adminService,WarehouseService warehouseService) {
+        this.adminService = adminService;
+        this.warehouseService =warehouseService;
+    }
 
-  // check if both passwords match
-  if (password !== confirmPassword) {
-    alert("Passwords don’t match");
-    return;
-  }
+    //  Create new admin
+    @PostMapping
+    @PreAuthorize("hasAuthority('SUPER_ADMIN')")
+    public ResponseEntity<Admin> createAdmin(@RequestBody Admin admin) {
+        return ResponseEntity.ok(adminService.createAdmin(admin));
+    }
 
-  try {
-    // 1. create user in Supabase Auth
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName, role: "admin" } },
-    });
+    //  Get all admins
+    @GetMapping
+    public ResponseEntity<List<Admin>> getAllAdmins() {
+        return ResponseEntity.ok(adminService.getAllAdmins());
+    }
 
-    if (error) throw error;
+    //  Get single admin by Supabase user ID
+    @GetMapping("/{supabaseUserId}")
+    public ResponseEntity<Admin> getAdminBySupabaseUserId(@PathVariable String supabaseUserId) {
+        return ResponseEntity.ok(adminService.getAdminBySupabaseUserId(supabaseUserId));
+    }
 
-    // Supabase gives us a unique id for this user
-    const supabaseUserId = data.user.id;
+    //  Get all imports for an admin
+    @GetMapping("/{supabaseUserId}/imports")
+    public ResponseEntity<List<ImportRecord>> getAllImports(@PathVariable String supabaseUserId) {
+        return ResponseEntity.ok(adminService.getAllImportsByAdmin(supabaseUserId));
+    }
 
-    // 2. prepare admin details to send to backend
-    const adminPayload = {
-      fullName,
-      email,
-      phoneNumber,
-      companyName,
-      supabaseUserId, // link Supabase auth with backend data
-      warehouses: [{ warehouseName,  location, enabled:true}],
-    };
+    //  Get all exports for an admin
+    @GetMapping("/{supabaseUserId}/exports")
+    public ResponseEntity<List<ExportRecord>> getAllExports(@PathVariable String supabaseUserId) {
+        return ResponseEntity.ok(adminService.getAllExportsByAdmin(supabaseUserId));
+    }
 
-    // 3. call backend API to save this admin
-    const res = await fetch("/api/admins", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(adminPayload),
-    });
+    //  Update admin
+    @PutMapping("/{supabaseUserId}")
+    public ResponseEntity<Admin> updateAdmin(@PathVariable String supabaseUserId, @RequestBody Admin admin) {
+        return ResponseEntity.ok(adminService.updateAdmin(supabaseUserId, admin));
+    }
 
-    if (!res.ok) throw new Error("Backend save failed");
+    //  Add New Warehouse to Admin by Supabase User ID
+    @PostMapping("/{supabaseUserId}/warehouses")
+    public Admin addWarehouseToAdmin(
+            @PathVariable String supabaseUserId,
+            @RequestBody Warehouse warehouse
+    ) {
+        return adminService.addWarehouseToAdmin(supabaseUserId, warehouse);
+    }
 
-    // 4. on success, good to go for login page
-    window.location.href = "/html/login.html";
-  } catch (err) {
-    console.error(err.message);
-    alert("Error: " + err.message);
-  }
-});
+    //  Get single warehouse by ID
+    @GetMapping("/warehouse/{warehouseId}")
+    public ResponseEntity<Warehouse> getWarehouseById(@PathVariable Long warehouseId) {
+        Warehouse warehouse = warehouseService.getWarehouseById(warehouseId);
+        return ResponseEntity.ok(warehouse);
+    }
+
+    //  update Warehouse info through warehouse id
+    @PutMapping("/warehouse/{warehouseId}")
+    public Warehouse updateWarehouse(
+            @PathVariable Long warehouseId,
+            @RequestBody Warehouse warehouse
+    ){
+        return warehouseService.updateWarehouse(warehouseId,warehouse);
+    }
+
+    //  update Warehouse activate or Inactive status through warehouse name
+    @PutMapping("/warehouse/status/{warehouseName}")
+    public Warehouse updateActiveInactiveOfWarehouse( @PathVariable String warehouseName){
+        return warehouseService.activateOrDeactivateWarehouse(warehouseName);
+    }
+
+    //  update Warehouse activate or Inactive status through warehouse id
+    @PutMapping("/warehouse/status/id/{warehouseId}")
+    public Warehouse updateActiveInactiveOfWarehouse( @PathVariable Long warehouseId){
+        return warehouseService.activateOrDeactivateWarehouse(warehouseId);
+    }
+
+    @DeleteMapping("/warehouse/id/{warehouseId}")
+    public ResponseEntity<String> deleteWarehouse(@PathVariable long warehouseId){
+        warehouseService.deleteWarehouse(warehouseId);
+        return ResponseEntity.ok("Warehouse deleted successfully");
+    }
+
+    //  Delete admin
+    @DeleteMapping("/{supabaseUserId}")
+    public ResponseEntity<String> deleteAdmin(@PathVariable String supabaseUserId) {
+        adminService.deleteAdmin(supabaseUserId);
+        return ResponseEntity.ok("Admin deleted successfully");
+    }
+}
