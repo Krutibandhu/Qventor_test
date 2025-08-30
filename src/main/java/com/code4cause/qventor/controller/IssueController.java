@@ -4,7 +4,7 @@ import com.code4cause.qventor.model.Issue;
 import com.code4cause.qventor.service.IssueService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
 @RestController
@@ -40,6 +40,7 @@ public class IssueController {
     }
 
     // 🟢 Admin updates issue status
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{issueId}/status")
     public ResponseEntity<Issue> updateIssueStatus(
             @PathVariable Long issueId,
