@@ -4,7 +4,7 @@ import com.code4cause.qventor.model.Issue;
 import com.code4cause.qventor.service.IssueService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
 @RestController
@@ -28,6 +28,7 @@ public class IssueController {
 
 
     // 🟢 Admin views all issues
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/{adminId}")
     public ResponseEntity<List<Issue>> getIssuesByAdminById(@PathVariable String adminId) {
         return ResponseEntity.ok(issueService.getIssuesByAdmin(adminId));
