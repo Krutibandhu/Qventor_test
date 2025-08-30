@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/admins")
 public class AdminController {
@@ -28,42 +27,49 @@ public class AdminController {
 
     //  Create new admin
     @PostMapping
+    @CrossOrigin(origins = {"https://admin.mycompany.com"})
     public ResponseEntity<Admin> createAdmin(@RequestBody Admin admin) {
         return ResponseEntity.ok(adminService.createAdmin(admin));
     }
 
     //  Get all admins
     @GetMapping
+    @CrossOrigin(origins = {"https://admin.mycompany.com"})
     public ResponseEntity<List<Admin>> getAllAdmins() {
         return ResponseEntity.ok(adminService.getAllAdmins());
     }
 
     //  Get single admin by Supabase user ID
     @GetMapping("/{supabaseUserId}")
+    @CrossOrigin(origins = {"https://admin.mycompany.com"})
     public ResponseEntity<Admin> getAdminBySupabaseUserId(@PathVariable String supabaseUserId) {
         return ResponseEntity.ok(adminService.getAdminBySupabaseUserId(supabaseUserId));
     }
 
     //  Get all imports for an admin
     @GetMapping("/{supabaseUserId}/imports")
+    @CrossOrigin(origins = {"https://admin.mycompany.com"})
     public ResponseEntity<List<ImportRecord>> getAllImports(@PathVariable String supabaseUserId) {
         return ResponseEntity.ok(adminService.getAllImportsByAdmin(supabaseUserId));
     }
 
     //  Get all exports for an admin
     @GetMapping("/{supabaseUserId}/exports")
+    @CrossOrigin(origins = {"https://admin.mycompany.com"})
     public ResponseEntity<List<ExportRecord>> getAllExports(@PathVariable String supabaseUserId) {
         return ResponseEntity.ok(adminService.getAllExportsByAdmin(supabaseUserId));
     }
 
     //  Update admin
     @PutMapping("/{supabaseUserId}")
+    @CrossOrigin(origins = {"https://admin.mycompany.com"})
     public ResponseEntity<Admin> updateAdmin(@PathVariable String supabaseUserId, @RequestBody Admin admin) {
         return ResponseEntity.ok(adminService.updateAdmin(supabaseUserId, admin));
     }
 
     //  Add New Warehouse to Admin by Supabase User ID
     @PostMapping("/{supabaseUserId}/warehouses")
+    @CrossOrigin(origins = {"https://admin.mycompany.com"})
     public Admin addWarehouseToAdmin(
             @PathVariable String supabaseUserId,
             @RequestBody Warehouse warehouse
@@ -73,6 +79,7 @@ public class AdminController {
 
     //  Get single warehouse by ID
     @GetMapping("/warehouse/{warehouseId}")
+    @CrossOrigin(origins = {"https://admin.mycompany.com"})
     public ResponseEntity<Warehouse> getWarehouseById(@PathVariable Long warehouseId) {
         Warehouse warehouse = warehouseService.getWarehouseById(warehouseId);
         return ResponseEntity.ok(warehouse);
@@ -80,6 +87,7 @@ public class AdminController {
 
     //  update Warehouse info through warehouse id
     @PutMapping("/warehouse/{warehouseId}")
+    @CrossOrigin(origins = {"https://admin.mycompany.com"})
     public Warehouse updateWarehouse(
             @PathVariable Long warehouseId,
             @RequestBody Warehouse warehouse
@@ -89,17 +97,20 @@ public class AdminController {
 
     //  update Warehouse activate or Inactive status through warehouse name
     @PutMapping("/warehouse/status/{warehouseName}")
+    @CrossOrigin(origins = {"https://admin.mycompany.com"})
     public Warehouse updateActiveInactiveOfWarehouse( @PathVariable String warehouseName){
         return warehouseService.activateOrDeactivateWarehouse(warehouseName);
     }
 
     //  update Warehouse activate or Inactive status through warehouse id
     @PutMapping("/warehouse/status/id/{warehouseId}")
+    @CrossOrigin(origins = {"https://admin.mycompany.com"})
     public Warehouse updateActiveInactiveOfWarehouse( @PathVariable Long warehouseId){
         return warehouseService.activateOrDeactivateWarehouse(warehouseId);
     }
 
     @DeleteMapping("/warehouse/id/{warehouseId}")
+    @CrossOrigin(origins = {"https://admin.mycompany.com"})
     public ResponseEntity<String> deleteWarehouse(@PathVariable long warehouseId){
         warehouseService.deleteWarehouse(warehouseId);
         return ResponseEntity.ok("Warehouse deleted successfully");
@@ -108,6 +119,7 @@ public class AdminController {
 
     //  Delete admin
     @DeleteMapping("/{supabaseUserId}")
+    @CrossOrigin(origins = {"https://admin.mycompany.com"})
     public ResponseEntity<String> deleteAdmin(@PathVariable String supabaseUserId) {
         adminService.deleteAdmin(supabaseUserId);
         return ResponseEntity.ok("Admin deleted successfully");
