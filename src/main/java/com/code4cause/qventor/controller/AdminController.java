@@ -9,6 +9,7 @@ import com.code4cause.qventor.service.WarehouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class AdminController {
     }
 
     //  Create new admin
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Admin> createAdmin(@RequestBody Admin admin) {
         return ResponseEntity.ok(adminService.createAdmin(admin));
